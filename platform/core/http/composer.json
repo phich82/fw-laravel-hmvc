@@ -1,21 +1,21 @@
 {
-    "name": "api/v2",
+    "name": "core/http",
     "require": {
-        "core/base": "*"
+        "guzzlehttp/guzzle": "^7.0"
     },
     "require-dev": {},
     "autoload": {
         "psr-4": {
-            "Api\\V2\\": "src/"
+            "Core\\Http\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Api\\V2\\Providers\\ModuleServiceProvider"
+                "Core\\Http\\Providers\\ModuleServiceProvider"
             ]
         }
     },
     "minimum-stability": "dev",
-    "description": "Api V2 Module"
+    "description": "Http Module"
 }

@@ -3,6 +3,8 @@
 namespace Api\V1\Providers;
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
+use Api\V1\Providers\ModuleServiceProvider;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
 class RouteServiceProvider extends ServiceProvider
@@ -15,9 +17,11 @@ class RouteServiceProvider extends ServiceProvider
 
     public function map()
     {
-        Route::prefix($this->_prefixApi())
-            ->middleware(config('api.middleware', $this->middleware))
-            ->namespace(config('api.namespace', $this->namespace))
+        $module = $this->getModuleName();
+
+        Route::prefix($this->_prefixApi($module))
+            ->middleware(config("{$module}::api.middleware", $this->middleware))
+            ->namespace(config("{$module}::api.namespace", $this->namespace))
             ->group(__DIR__ . '/../../routes/api.php');
     }
 
@@ -26,11 +30,48 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return string
      */
-    private function _prefixApi()
+    private function _prefixApi($module = '')
     {
-        $prefix  = config('api.prefix', $this->prefix);
-        $version = config('api.version', $this->version);
+        $module = $module ? "{$module}::" : '';
+        $prefix  = config("{$module}api.prefix", $this->prefix);
+        $version = config("{$module}api.version", $this->version);
 
         return "{$prefix}/{$version}";
+    }
+
+    /**
+     * Get module name
+     *
+     * @return string
+     */
+    private function getModuleName()
+    {
+        return (new ModuleServiceProvider(app()->make(Application::class)))->getModuleName();
+    }
+
+    /**
+     * Get config
+     *
+     * @param  string $key
+     * @param  mixed $default
+     * @return mixed
+     */
+    private function config($key = null, $default = null)
+    {
+        try {
+            $keys = explode('.', $key);
+            if (empty($keys)) {
+                return $default;
+            }
+            $filename = array_shift($keys);
+            $config = include(__DIR__ . "/../../config/{$filename}.php");
+            $value = $config;
+            foreach ($keys as $key) {
+                $value = $config[$key];
+            }
+            return $value;
+        } catch (\Exception $e) {
+            return $default;
+        }
     }
 }

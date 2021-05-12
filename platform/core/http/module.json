@@ -1,0 +1,5 @@
+{
+    "alias": "http",
+    "description": "Http Module",
+    "namespace": "Core\\Http"
+}

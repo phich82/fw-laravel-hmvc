@@ -83,7 +83,12 @@ abstract class AbstractModuleProvider extends ServiceProvider
         $configs = $this->splitFilesWithBasename($this->app['files']->glob($this->getDir() . '/../../config/*.php'));
 
         foreach ($configs as $key => $row) {
-            $this->mergeConfigFrom($row, $key);
+            // Merge without module prefix
+            // $this->mergeConfigFrom($row, $key);
+            // Merge with module prefix
+            // {module_name}::{config_file}.{key}
+            // config('api-v1::api.prefix')
+            $this->mergeConfigFrom($row, "{$this->getModuleName()}::{$key}");
         }
     }
 

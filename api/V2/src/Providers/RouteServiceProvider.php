@@ -3,8 +3,9 @@
 namespace Api\V2\Providers;
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
+use Api\V2\Providers\ModuleServiceProvider;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\File;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -16,23 +17,37 @@ class RouteServiceProvider extends ServiceProvider
 
     public function map()
     {
-        Route::prefix($this->_prefixApi())
-            ->middleware($this->config('api.middleware', $this->middleware))
-            ->namespace($this->config('api.namespace', $this->namespace))
+        $module = $this->getModuleName();
+
+        Route::prefix($this->_prefixApi($module))
+            ->middleware(config("{$module}::api.middleware", $this->middleware))
+            ->namespace(config("{$module}::api.namespace", $this->namespace))
             ->group(__DIR__ . '/../../routes/api.php');
     }
 
     /**
      * Get prefix of api
      *
+     * @param string $module
      * @return string
      */
-    private function _prefixApi()
+    private function _prefixApi($module = '')
     {
-        $prefix  = $this->config('api.prefix', $this->prefix);
-        $version = $this->config('api.version', $this->version);
+        $module = $module ? "{$module}::" : '';
+        $prefix  = config("{$module}api.prefix", $this->prefix);
+        $version = config("{$module}api.version", $this->version);
 
         return "{$prefix}/{$version}";
+    }
+
+    /**
+     * Get module name
+     *
+     * @return string
+     */
+    private function getModuleName()
+    {
+        return (new ModuleServiceProvider(app()->make(Application::class)))->getModuleName();
     }
 
     /**
@@ -42,16 +57,16 @@ class RouteServiceProvider extends ServiceProvider
      * @param  mixed $default
      * @return mixed
      */
-    private function config($key, $default = null)
+    private function config($key = null, $default = null)
     {
         try {
             $keys = explode('.', $key);
             if (empty($keys)) {
                 return $default;
             }
-            $file = array_shift($keys);
-            $config = include(__DIR__ . "/../../config/{$file}.php");
-            $value = null;
+            $filename = array_shift($keys);
+            $config = include(__DIR__ . "/../../config/{$filename}.php");
+            $value = $config;
             foreach ($keys as $key) {
                 $value = $config[$key];
             }
