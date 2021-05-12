@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
+        "api/v1": "*",
         "core/base": "*",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
@@ -36,6 +37,10 @@
         }
     },
     "repositories": [
+        {
+            "type": "path",
+            "url": "./api/*"
+        },
         {
             "type": "path",
             "url": "./platform/packages/*"

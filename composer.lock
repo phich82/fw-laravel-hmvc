@@ -4,8 +4,34 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4ecdd6327d68fdc271bd57698afe41dd",
+    "content-hash": "18762988d03c24efab2f19994ead48b8",
     "packages": [
+        {
+            "name": "api/v1",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./api/V1",
+                "reference": "57f26454c1cc64a6914cb7358c6b8d60f960fd5c"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Api\\V1\\Providers\\ModuleServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Api\\V1\\": "src/"
+                }
+            },
+            "description": "Api Module",
+            "transport-options": {
+                "relative": true
+            }
+        },
         {
             "name": "asm89/stack-cors",
             "version": "v2.0.3",
