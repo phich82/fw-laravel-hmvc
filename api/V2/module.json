@@ -1,0 +1,5 @@
+{
+    "alias": "api-v2",
+    "description": "Api V2 Module",
+    "namespace": "Api\\V2"
+}

@@ -1,19 +1,19 @@
 {
-    "name": "api/v1",
+    "name": "api/v2",
     "require": {},
     "require-dev": {},
     "autoload": {
         "psr-4": {
-            "Api\\V1\\": "src/"
+            "Api\\V2\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Api\\V1\\Providers\\ModuleServiceProvider"
+                "Api\\V2\\Providers\\ModuleServiceProvider"
             ]
         }
     },
     "minimum-stability": "dev",
-    "description": "Api V1 Module"
+    "description": "Api V2 Module"
 }

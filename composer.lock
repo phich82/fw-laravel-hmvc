@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "18762988d03c24efab2f19994ead48b8",
+    "content-hash": "3e8e4b6e8f248d76264b6383cb33769f",
     "packages": [
         {
             "name": "api/v1",
@@ -28,6 +28,32 @@
                 }
             },
             "description": "Api Module",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "api/v2",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./api/V2",
+                "reference": "597883a9057517704ed5824373117f4db004ec7e"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Api\\V2\\Providers\\ModuleServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Api\\V2\\": "src/"
+                }
+            },
+            "description": "Api V2 Module",
             "transport-options": {
                 "relative": true
             }
