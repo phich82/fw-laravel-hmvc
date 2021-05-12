@@ -1,0 +1,21 @@
+{
+    "name": "plugins/demo-module",
+    "require": {
+        "core/base": "*"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Plugins\\DemoModule\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Plugins\\DemoModule\\Providers\\ModuleServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "description": "Demo Module"
+}

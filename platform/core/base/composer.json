@@ -1,0 +1,21 @@
+{
+    "name": "core/base",
+    "require": {
+        "core/devtools": "*"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Core\\Base\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Core\\Base\\Providers\\BaseModuleServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "description": "CoreBase Module"
+}

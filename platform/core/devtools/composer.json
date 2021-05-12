@@ -1,0 +1,18 @@
+{
+    "name": "core/devtools",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Devtools\\": "src/"
+        },
+        "files": []
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Devtools\\Providers\\ModuleServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}

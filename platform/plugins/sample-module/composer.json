@@ -1,0 +1,19 @@
+{
+    "name": "plugins/sample-module",
+    "require": {},
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Plugins\\SampleModule\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Plugins\\SampleModule\\Providers\\ModuleServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "description": "SampleModule Module"
+}

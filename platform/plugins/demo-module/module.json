@@ -1,0 +1,5 @@
+{
+    "alias": "demo-module",
+    "description": "Demo Module",
+    "namespace": "Plugins\\DemoModule"
+}
