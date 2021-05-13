@@ -2,7 +2,6 @@
 
 namespace App\Binding;
 
-use Api\V1\Http\Controllers\ApiController;
 use Core\Http\Services\Contracts\HttpContract;
 use Core\Http\Services\Implementations\Http;
 
