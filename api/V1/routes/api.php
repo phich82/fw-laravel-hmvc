@@ -8,3 +8,5 @@ Route::get('test', function () {
 });
 
 Route::get('demo', [ApiController::class, 'demo']);
+Route::get('json', [ApiController::class, 'json']);
+Route::get('users', [ApiController::class, 'getUsers']);
