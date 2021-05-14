@@ -100,6 +100,40 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        'web' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/web/admin.log'),
+            'level' => 'debug',
+            'permission' => 0777,
+        ],
+
+        'api' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/api/api.log'),
+            'level' => 'debug',
+            'permission' => 0777,
+        ],
+
+        'push' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/push/push.log'),
+            'level' => 'debug',
+            'permission' => 0777,
+        ],
+
+        'webhook' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/webhook/webhook.log'),
+            'level' => 'debug',
+            'permission' => 0777,
+        ],
+
+        'custom' => [
+            'driver' => 'custom',
+            'via' => Core\Logger\Services\CustomLogger::class
+        ]
+
     ],
 
 ];

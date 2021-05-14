@@ -1,10 +1,8 @@
 <?php
 
-namespace Api\V2\Providers;
+namespace Core\Logger\Providers;
 
-use Api\V2\Exceptions\Handler;
 use Devtools\Providers\AbstractModuleProvider;
-use Illuminate\Contracts\Debug\ExceptionHandler;
 
 class ModuleServiceProvider extends AbstractModuleProvider
 {
@@ -21,7 +19,7 @@ class ModuleServiceProvider extends AbstractModuleProvider
      */
     public function getModuleName()
     {
-        return 'api-v2';
+        return 'logger';
     }
 
     /**
@@ -32,8 +30,6 @@ class ModuleServiceProvider extends AbstractModuleProvider
     public function boot()
     {
         parent::boot();
-
-        $this->app->bind(ExceptionHandler::class, Handler::class);
     }
 
     /**

@@ -2,7 +2,9 @@
 
 namespace Api\V1\Providers;
 
+use Api\V1\Exceptions\Handler;
 use Devtools\Providers\AbstractModuleProvider;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 
 class ModuleServiceProvider extends AbstractModuleProvider
 {
@@ -30,6 +32,8 @@ class ModuleServiceProvider extends AbstractModuleProvider
     public function boot()
     {
         parent::boot();
+
+        $this->app->bind(ExceptionHandler::class, Handler::class);
     }
 
     /**

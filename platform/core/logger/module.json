@@ -1,0 +1,5 @@
+{
+    "alias": "logger",
+    "description": "Logger Module",
+    "namespace": "Core\\Logger"
+}

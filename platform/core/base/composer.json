@@ -2,7 +2,8 @@
     "name": "core/base",
     "require": {
         "core/devtools": "*",
-        "core/http": "*"
+        "core/http": "*",
+        "core/logger": "*"
     },
     "require-dev": {},
     "autoload": {

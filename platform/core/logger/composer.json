@@ -1,0 +1,19 @@
+{
+    "name": "core/logger",
+    "require": {},
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Core\\Logger\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Core\\Logger\\Providers\\ModuleServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "description": "Logger Module"
+}

@@ -1,6 +1,6 @@
 <?php
 
-namespace Api\V1\Exceptions;
+namespace Api\V2\Exceptions;
 
 use Core\Http\Traits\ApiResponse;
 use Exception;

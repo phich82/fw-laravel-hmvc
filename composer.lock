@@ -179,11 +179,12 @@
             "dist": {
                 "type": "path",
                 "url": "./platform/core/base",
-                "reference": "e5661f109f40363445c571b93abd5e02c501c95b"
+                "reference": "04bc1d2ca33dcfe684dcc56e3cc83e51f5987119"
             },
             "require": {
                 "core/devtools": "*",
-                "core/http": "*"
+                "core/http": "*",
+                "core/logger": "*"
             },
             "type": "library",
             "extra": {
@@ -254,6 +255,32 @@
                 }
             },
             "description": "Http Module",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "core/logger",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./platform/core/logger",
+                "reference": "3034ea47c91103cb9077e52cc3e670fea1207d8f"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Core\\Logger\\Providers\\ModuleServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Core\\Logger\\": "src/"
+                }
+            },
+            "description": "Logger Module",
             "transport-options": {
                 "relative": true
             }
