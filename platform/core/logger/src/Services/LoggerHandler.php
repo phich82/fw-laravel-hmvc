@@ -33,7 +33,11 @@ class LoggerHandler extends AbstractProcessingHandler
         $message = $record['message'] ?? '';
 
         if (isApi()) {
-            AppLog::api()->{$method}($message, $context);
+            AppLog::api(getApiVersion())->{$method}($message, $context);
+        } elseif (isWebhook()) {
+            AppLog::webhook(getWebhookVersion())->{$method}($message, $context);
+        } elseif (isPush()) {
+            AppLog::push(getPushVersion())->{$method}($message, $context);
         } else {
             AppLog::web()->{$method}($message, $context);
         }

@@ -14,10 +14,23 @@ class AppLog
 
     private const DEFAULT_LOG_FILE = 'logs/web/admin.log';
     private const USE_POSTFIX_DYNAMICALLY = true;
+    private const DATETIME_FORMAT = 'Y-m-d';
+    private const FILENAME_POSTFIX_DELIMITER = '_';
 
     protected $channel = self::WEB_CHANNEL;
     protected $path = self::DEFAULT_LOG_FILE;
+    /**
+     * Version of api
+     *
+     * @var string
+     */
+    protected $version = '';
 
+    /**
+     * All declared channels MUST be mapped here
+     *
+     * @var array
+     */
     private $mappingFileNameToChannel = [
         'admin'   => self::WEB_CHANNEL,
         'api'     => self::API_CHANNEL,
@@ -34,8 +47,10 @@ class AppLog
      */
     public function __call($method, $arguments)
     {
-        $this->_validate();
+        $this->_setLogFilePathDynamically();
         Log::channel($this->channel)->{$method}(...$arguments);
+        // Reset
+        $this->version = '';
         $this->channel = self::WEB_CHANNEL;
         $this->path = $this->_webLogFilePathDefault();
     }
@@ -43,44 +58,52 @@ class AppLog
     /**
      * Set 'web' channel
      *
+     * @param  string $version
      * @param  string $path
      * @return \AppLog
      */
-    public function web($path = null)
+    public function web($version = '', $path = null)
     {
+        $this->version = $version;
         return $this->_resolve(self::WEB_CHANNEL, $path);
     }
 
     /**
      * Set 'api' channel
      *
+     * @param  string $version
      * @param  string $path
      * @return \AppLog
      */
-    public function api($path = null)
+    public function api($version = '', $path = null)
     {
+        $this->version = $version;
         return $this->_resolve(self::API_CHANNEL, $path);
     }
 
     /**
      * Set 'push' channel
      *
+     * @param  string $version
      * @param  string $path
      * @return \AppLog
      */
-    public function push($path = null)
+    public function push($version = '', $path = null)
     {
+        $this->version = $version;
         return $this->_resolve(self::PUSH_CHANNEL, $path);
     }
 
     /**
      * Set 'webhook' channel
      *
+     * @param  string $version
      * @param  string $path
      * @return \AppLog
      */
-    public function webhook($path = null)
+    public function webhook($version = '', $path = null)
     {
+        $this->version = $version;
         return $this->_resolve(self::WEBHOOK_CHANNEL, $path);
     }
 
@@ -100,7 +123,7 @@ class AppLog
      * @return void
      * @throws \Exception
      */
-    private function _validate()
+    private function _setLogFilePathDynamically()
     {
         // Verify channel
         $channelTarget = "logging.channels.{$this->channel}";
@@ -113,15 +136,17 @@ class AppLog
         $defaultPath = config($keyPath);
         // Set name of log file dynamically
         if (self::USE_POSTFIX_DYNAMICALLY) {
+            // Get channel in the given file path
             $filenameCurrent = current(array_slice(explode('/', $this->path), -1));
-            $prefixFileName = strtolower(explode('.', $filenameCurrent)[0]);
-            $prefixFileName = strtolower(explode('_', $prefixFileName)[0]);
-            $channel = strtolower($this->mappingFileNameToChannel[$prefixFileName]);
-
-            $method = "_{$channel}LogFilePathDefault";
-            $this->path = $this->{$method}();
+            $filename = strtolower(explode(self::FILENAME_POSTFIX_DELIMITER, $filenameCurrent)[0]);
+            $channel = strtolower($this->mappingFileNameToChannel[$filename]);
+            // Set new path of the log file (dynnamically)
+            $methodClass = "_{$channel}LogFilePathDefault";
+            if (method_exists($this, $methodClass)) {
+                $this->path = $this->{$methodClass}();
+            }
         }
-        // Verify the log file & change the default path of it
+        // Set new path of the log file dynamically
         $pathLogFile = $this->getLogFilePath();
         if (!file_exists($pathLogFile) || $defaultPath != $pathLogFile) {
             config()->set($keyPath, $pathLogFile);
@@ -137,10 +162,16 @@ class AppLog
      */
     private function _resolve($channel, $path = null)
     {
-        $postfix = $this->_postfix(date('Y-m-d'));
+        $postfix = $this->_postfix(date(self::DATETIME_FORMAT));
         $prefixMethod = strtolower($channel);
+        $methodClass = "_{$prefixMethod}LogFilePathDefault";
 
-        $this->path = $path ?: $this->{"_{$prefixMethod}LogFilePathDefault"}($postfix);
+        if ($path) {
+            $this->path = $path;
+        } elseif (method_exists($this, $methodClass)) {
+            $this->path = $this->{$methodClass}($postfix);
+        }
+
         $this->channel = $channel;
 
         return $this;
@@ -155,7 +186,7 @@ class AppLog
     private function _postfix($postfix = null)
     {
         if (self::USE_POSTFIX_DYNAMICALLY) {
-            return '_'.($postfix ?: date('Y-m-d'));
+            return self::FILENAME_POSTFIX_DELIMITER.($postfix ?: date(self::DATETIME_FORMAT));
         }
         return '';
     }
@@ -169,9 +200,10 @@ class AppLog
     private function _webLogFilePathDefault($postfix = null)
     {
         $postfix = $postfix ?: $this->_postfix();
-        $channel = strtolower(self::WEB_CHANNEL);
+        $filename = $this->_getFileNameMapping(self::WEB_CHANNEL);
+        $version = $this->version ? "/{$this->version}" : '';
 
-        return "logs/web/admin{$postfix}.log";
+        return "logs/web{$version}/{$filename}{$postfix}.log";
     }
 
     /**
@@ -183,8 +215,10 @@ class AppLog
     private function _apiLogFilePathDefault($postfix = null)
     {
         $postfix = $postfix ?: $this->_postfix();
+        $filename = $this->_getFileNameMapping(self::API_CHANNEL);
+        $version = $this->version ? "/{$this->version}" : '';
 
-        return "logs/api/api{$postfix}.log";
+        return "logs/api{$version}/{$filename}{$postfix}.log";
     }
 
     /**
@@ -196,8 +230,10 @@ class AppLog
     private function _pushLogFilePathDefault($postfix = null)
     {
         $postfix = $postfix ?: $this->_postfix();
+        $filename = $this->_getFileNameMapping(self::PUSH_CHANNEL);
+        $version = $this->version ? "/{$this->version}" : '';
 
-        return "logs/web/push{$postfix}.log";
+        return "logs/push{$version}/{$filename}{$postfix}.log";
     }
 
     /**
@@ -209,7 +245,25 @@ class AppLog
     private function _webhookLogFilePathDefault($postfix = null)
     {
         $postfix = $postfix ?: $this->_postfix();
+        $filename = $this->_getFileNameMapping(self::WEBHOOK_CHANNEL);
+        $version = $this->version ? "/{$this->version}" : '';
 
-        return "logs/web/webhook{$postfix}.log";
+        return "logs/webhook{$version}/{$filename}{$postfix}.log";
+    }
+
+    /**
+     * Get filename of the log file by channel
+     *
+     * @param  string $channel
+     * @return null|string
+     */
+    private function _getFileNameMapping($channel)
+    {
+        foreach ($this->mappingFileNameToChannel as $filename => $channelMapping) {
+            if ($channel == $channelMapping) {
+                return $filename;
+            }
+        }
+        return null;
     }
 }

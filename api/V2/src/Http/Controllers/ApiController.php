@@ -5,6 +5,7 @@ namespace Api\V2\Http\Controllers;
 use App\Http\Controllers\ApiBaseController;
 use Core\Http\Services\Facades\Http;
 use Core\Http\Services\Contracts\HttpContract;
+use Illuminate\Support\Facades\Log;
 
 class ApiController extends ApiBaseController
 {
@@ -21,6 +22,7 @@ class ApiController extends ApiBaseController
 
     public function demo()
     {
+        Log::info('Demo V2 Test');
         return response()->json([
             'message' => 'V2 Test Data'
         ], 200);
