@@ -16,8 +16,9 @@ class CustomLogger
      */
     public function __invoke(array $config =[])
     {
-        $logger = new Logger($this->_channel());
-        $logger->pushHandler(new LoggerHandler());
+        $channel = $this->_channel();
+        $logger = new Logger($channel);
+        $logger->pushHandler(new LoggerHandler($channel));
 
         return $logger;
     }

@@ -1,8 +1,10 @@
 <?php
 
+use App\Services\Notifier;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
+use Monolog\Logger;
 
 return [
 
@@ -105,33 +107,46 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/web/admin.log'),
             'level' => 'debug',
-            'permission' => 0777,
+            'permission' => 0755,
         ],
 
         'api' => [
             'driver' => 'single',
+            // Customize format of each log line
+            'tap' => [App\Services\Implementations\ApiChannelCustomerFormatter::class],
             'path' => storage_path('logs/api/api.log'),
             'level' => 'debug',
-            'permission' => 0777,
+            'permission' => 0755,
         ],
 
         'push' => [
             'driver' => 'single',
+            // Customize format of each log line
+            'tap' => [App\Services\Implementations\PushChannelCustomerFormatter::class],
             'path' => storage_path('logs/push/push.log'),
             'level' => 'debug',
-            'permission' => 0777,
+            'permission' => 0755,
         ],
 
         'webhook' => [
             'driver' => 'single',
+            // Customize format of each log line
+            'tap' => [App\Services\Implementations\WebhookChannelCustomerFormatter::class],
             'path' => storage_path('logs/webhook/webhook.log'),
             'level' => 'debug',
-            'permission' => 0777,
+            'permission' => 0755,
         ],
 
         'custom' => [
             'driver' => 'custom',
-            'via' => Core\Logger\Services\CustomLogger::class
+            'via' => Core\Logger\Services\CustomLogger::class,
+            // extra config for send log message to specified channels (servers: email, slack, skype,...)
+            'extra' => [
+                'notifier' => Notifier::class,
+                'method' => 'send',
+                'levels' => [Logger::CRITICAL, Logger::EMERGENCY, Logger::ERROR],
+                'queue' => '',
+            ],
         ]
 
     ],

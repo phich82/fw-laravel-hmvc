@@ -18,3 +18,23 @@ Route::get('/', function () {
     Log::info('Web Test Log');
     return view('welcome');
 });
+
+Route::get('/api/v1/test/error', function () {
+    Log::error('Error Test - Api V1');
+    dd('Error Test - Api V1');
+});
+
+Route::get('/webhook/test', function () {
+    Log::info('Webhook Test');
+    dd('Webhook Test');
+});
+
+Route::get('/webhook/v1/test', function () {
+    Log::info('Webhook V1 Test');
+    dd('Webhook V1 Test');
+});
+
+Route::get('/webhook/v2/test', function () {
+    Log::info('Webhook V2 Test');
+    dd('Webhook V2 Test');
+});
