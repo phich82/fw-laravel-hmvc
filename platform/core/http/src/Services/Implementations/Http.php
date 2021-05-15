@@ -51,6 +51,7 @@ class Http implements HttpContract
     protected $params = [];
     protected $paramsQuery = [];
     protected $commonKey = 'common';
+    protected $bodyTypeKey = 'body_type';
     protected $bodyType = 'json'; // json|body|form_params|multipart
     protected $queryKey = 'query';
     protected $version = ''; // api version
@@ -89,15 +90,15 @@ class Http implements HttpContract
      *
      * @param  string $method
      * @param  string $path
-     * @param  mixed $params
+     * @param  array $params
      * @param  mixed $async
      * @return mixed
      */
-    public function request($method, $path, $params = [], $async = false)
+    public function request($method, $path, array $params = [], $async = false)
     {
         try {
             $path = $this->_resolvePath($path, $async);
-            $options = $this->_resolveOptions($method, $params);
+            $options = $this->_resolveOptions($method, $params, $async);
             $async = $this->_isAsync($async);
 
 
@@ -299,41 +300,75 @@ class Http implements HttpContract
      *
      * @param  string $method
      * @param  array $params
+     * @param  array $async
      * @return array
      */
-    private function _resolveOptions($method, $params)
+    private function _resolveOptions($method, $params, $async)
     {
-        $bodyTypes = array_values(array_intersect($this->_supportedBodyTypes(), array_keys($params)));
-        if (!empty($bodyTypes)) {
-            if (array_key_exists($this->bodyType, $params)) {
-                $params[$this->bodyType] = array_merge($this->params, $params[$this->bodyType]);
-            }
-            if (!empty($this->paramsQuery)) {
-                $params[$this->queryKey] = array_merge($this->paramsQuery, $params[$this->queryKey] ?? []);
-            }
-            return $params;
-        }
-
         // If request method is GET
-        if (in_array(strtoupper($method), ['GET'])) {
+        if (in_array(strtoupper($method), ['GET', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE'])) {
             return [
                 $this->queryKey => array_merge($this->paramsQuery, $params)
             ];
         }
 
-        // Others
-        $options = [$this->bodyType => array_merge($this->params, $params)];
-        if ($this->bodyType != $this->queryKey && !empty($this->paramsQuery)) {
-            $options[$this->queryKey] = $this->paramsQuery;
+        if (is_bool($async)) {
+            $async['async'] = $async;
         }
-        return $options;
+
+        $bodyType = $this->bodyType;
+
+        if (isset($async[$this->bodyTypeKey]) && in_array($async[$this->bodyTypeKey], $this->_supportedBodyTypes())) {
+            $bodyType = $async[$this->bodyTypeKey];
+        }
+
+        return [
+            $bodyType => array_merge($this->params, $params ?: []),
+            $this->queryKey => array_merge($this->paramsQuery, $async[$this->queryKey] ?? []),
+        ];
+
+        // $bodyTypes = array_values(array_intersect($this->_supportedBodyTypes(), array_keys($params)));
+        // if (!empty($bodyTypes)) {
+        //     if (array_key_exists($this->bodyType, $params)) {
+        //         $params[$this->bodyType] = array_merge($this->params, $params[$this->bodyType]);
+        //     }
+        //     if (!empty($this->paramsQuery)) {
+        //         $params[$this->queryKey] = array_merge($this->paramsQuery, $params[$this->queryKey] ?? []);
+        //     }
+        //     return $params;
+        // }
+
+        // // If request method is GET
+        // if (in_array(strtoupper($method), ['GET'])) {
+        //     return [
+        //         $this->queryKey => array_merge($this->paramsQuery, $params)
+        //     ];
+        // }
+
+        // // Others
+        // $options = [$this->bodyType => array_merge($this->params, $params)];
+        // if ($this->bodyType != $this->queryKey && !empty($this->paramsQuery)) {
+        //     $options[$this->queryKey] = $this->paramsQuery;
+        // }
+        // return $options;
     }
 
+    /**
+     * Body types are supported
+     *
+     * @return array
+     */
     private function _supportedBodyTypes()
     {
         return ['json', 'body', 'query', 'form_params', 'multipart'];
     }
 
+    /**
+     * Check request is asynchronously
+     *
+     * @param  bool|array $async
+     * @return bool
+     */
     private function _isAsync($async)
     {
         if (is_bool($async)) {

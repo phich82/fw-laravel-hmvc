@@ -179,12 +179,13 @@
             "dist": {
                 "type": "path",
                 "url": "./platform/core/base",
-                "reference": "04bc1d2ca33dcfe684dcc56e3cc83e51f5987119"
+                "reference": "5428372d97b15308a8cc1c3dc01478e0e47d9b16"
             },
             "require": {
                 "core/devtools": "*",
                 "core/http": "*",
-                "core/logger": "*"
+                "core/logger": "*",
+                "core/notifier": "*"
             },
             "type": "library",
             "extra": {
@@ -281,6 +282,32 @@
                 }
             },
             "description": "Logger Module",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "core/notifier",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./platform/core/notifier",
+                "reference": "15f22e372ddabada097140903768cac332a39337"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Core\\Notifier\\Providers\\ModuleServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Core\\Notifier\\": "src/"
+                }
+            },
+            "description": "Notifier Module",
             "transport-options": {
                 "relative": true
             }

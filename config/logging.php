@@ -1,6 +1,5 @@
 <?php
 
-use App\Services\Notifier;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -139,13 +138,27 @@ return [
 
         'custom' => [
             'driver' => 'custom',
-            'via' => Core\Logger\Services\CustomLogger::class,
+            'via' => \Core\Logger\Services\CustomLogger::class,
             // extra config for send log message to specified channels (servers: email, slack, skype,...)
             'extra' => [
-                'notifier' => Notifier::class,
+                'notifier' => \Core\Notifier\Services\Contracts\LogNotifierContract::class,
                 'method' => 'send',
                 'levels' => [Logger::CRITICAL, Logger::EMERGENCY, Logger::ERROR],
                 'queue' => '',
+                // Resolve arguments of 'send' method of notifier class
+                'callable' => function (array $error) {
+                    $subject = "[{$error['level_name']}]Error Log System";
+                    $template = 'error';
+                    $data = $error + [
+                        'from' => '',
+                        'from_name' => '',
+                        'to' => '',
+                        'to_name' => '',
+                        'cc' => '',
+                        'bcc' => '',
+                    ];
+                    return [$subject, $template, $data];
+                },
             ],
         ]
 

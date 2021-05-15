@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Core\Notifier\Services\Contracts\NotifierContract;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,4 +38,9 @@ Route::get('/webhook/v1/test', function () {
 Route::get('/webhook/v2/test', function () {
     Log::info('Webhook V2 Test');
     dd('Webhook V2 Test');
+});
+
+Route::get('/sendmail', function (NotifierContract $notifier) {
+    $notifier->send('test', 'test', ['test']);
+    dd('SendMail Test.');
 });

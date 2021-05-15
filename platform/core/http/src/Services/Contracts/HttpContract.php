@@ -43,8 +43,8 @@ interface HttpContract
      * @param string $method
      * @param string $path
      * @param array $options
-     * @param bool $async
+     * @param bool|array $async
      * @return mixed
      */
-    public function request($method, $path, $options = [], $async = false);
+    public function request($method, $path, array $options = [], $async = false);
 }

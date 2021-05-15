@@ -51,33 +51,34 @@ class LoggerHandler extends AbstractProcessingHandler
         }
 
         // Send log to specified servers based on error levels
-        $this->dispatchNotification($level, $message, $context);
+        $this->dispatchNotification($record);
     }
 
     /**
      * Send log message to specified channels (servers: email, slack, skype, pusher,...)
      *
-     * @param  int $level
-     * @param  string $message
-     * @param  mixed $context
+     * @param  array $record
      * @return void
      */
-    private function dispatchNotification($level, $message, $context = [])
+    private function dispatchNotification(array $record)
     {
         // Send log to specified servers based on error levels
         if ($this->targetChannel && config("logging.channels.{$this->targetChannel}.extra", null)) {
             $extra = config("logging.channels.{$this->targetChannel}.extra");
-            $levelsAllowed = array_key_exists('levels', $extra) && $extra['levels'] ? $extra['levels'] : [];
-            $levelsAllowed = is_string($levelsAllowed) ? [$levelsAllowed] : $levelsAllowed;
+            $levelsAllowed = $extra['levels'] ?? [];
+            $notifier = $extra['notifier'] ?? null;
+            $send = $extra['method'] ?? 'send';
 
             // If error level allowed
-            if (in_array($level, $levelsAllowed)) {
-                $notifier = array_key_exists('notifier', $extra) && $extra['notifier'] ? $extra['notifier'] : null;
-                $send = array_key_exists('method', $extra) && $extra['method'] ? $extra['method'] : 'send';
-
-                if ($notifier) {
-                    app()->make($notifier)->{$send}($message, $context);
-                }
+            if (
+                in_array($record['level'], $levelsAllowed) &&
+                !empty($extra['data']) &&
+                is_string($notifier) &&
+                is_callable($extra['callable'])
+            ) {
+                $arguments = $extra['callable']($record);
+                // Send message
+                app()->make($notifier)->{$send}(...$arguments);
             }
         }
     }

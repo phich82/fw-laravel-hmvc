@@ -1,0 +1,19 @@
+{
+    "name": "core/notifier",
+    "require": {},
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Core\\Notifier\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Core\\Notifier\\Providers\\ModuleServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "description": "Notifier Module"
+}

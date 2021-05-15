@@ -1,0 +1,5 @@
+{
+    "alias": "notifier",
+    "description": "Notifier Module",
+    "namespace": "Core\\Notifier"
+}

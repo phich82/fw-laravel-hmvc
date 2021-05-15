@@ -3,7 +3,8 @@
     "require": {
         "core/devtools": "*",
         "core/http": "*",
-        "core/logger": "*"
+        "core/logger": "*",
+        "core/notifier": "*"
     },
     "require-dev": {},
     "autoload": {
