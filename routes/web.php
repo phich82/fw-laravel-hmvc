@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Core\Notifier\Services\Contracts\NotifierContract;
+use Core\Notifier\Services\Contracts\SmsAdapter;
+use Core\Notifier\Services\Implementations\Sms;
+use Core\Notifier\Services\Implementations\Sms\NexmoSms;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +21,12 @@ use Core\Notifier\Services\Contracts\NotifierContract;
 Route::get('/', function () {
     Log::info('Web Test Log');
     return view('welcome');
+});
+
+Route::get('/sms', function (SmsAdapter $sms) {
+    dd(new Sms(new NexmoSms()), Sms::nexmo(['xxx']));
+    //$message = $sms->send('Message from Twilio', '', ['phone_number' => '+84903012375']);
+    //dd('Send sms.', $message);
 });
 
 Route::get('/api/v1/test/error', function () {

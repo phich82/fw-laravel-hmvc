@@ -2,15 +2,15 @@
 
 namespace Core\Notifier\Services\Contracts;
 
-interface SmsAdapter
+interface SmsAdapter extends NotifierContract
 {
     /**
      * Send message
      *
-     * @param  string $subject
-     * @param  string $template
-     * @param  mixed $data
+     * @param  string $to
+     * @param  string $string
+     * @param  array $data
      * @return bool|void
      */
-    public function send($subject, $template, $data);
+    public function makeCall($to, $from, array $options);
 }

@@ -21,6 +21,8 @@ use Core\Notifier\Services\Implementations\SkypeNotifier;
 use Core\Notifier\Services\Implementations\SlackNotifier;
 use Core\Notifier\Services\Implementations\PushNotification;
 use Core\Notifier\Services\Contracts\PushNotificationAdapter;
+use Core\Notifier\Services\Implementations\Sms\NexmoSms;
+use Core\Notifier\Services\Implementations\Sms\TwilioSms;
 
 class ModuleServiceProvider extends AbstractModuleProvider
 {
@@ -99,6 +101,17 @@ class ModuleServiceProvider extends AbstractModuleProvider
             // );
 
             // Email, Slack, Skype & Sms
+            // return new SmsNotifier(
+            //     new SkypeNotifier(
+            //         new SlackNotifier(
+            //             new EmailOnly(new Mailer),
+            //             new Slack
+            //         ),
+            //         new Skype
+            //     ),
+            //     new Sms
+            // );
+
             return new SmsNotifier(
                 new SkypeNotifier(
                     new SlackNotifier(
@@ -107,7 +120,14 @@ class ModuleServiceProvider extends AbstractModuleProvider
                     ),
                     new Skype
                 ),
-                new Sms
+                // new TwilioSms([
+                //     'phone_number' => ['+84903012375', '+841673850375'],
+                //     'from' => env('TWILIO_FROM')
+                // ])
+                new NexmoSms([
+                    'phone_number' => ['84373850375'],
+                    'from' => 'Vonage APIs', //env('TWILIO_FROM')
+                ])
             );
         });
 

@@ -1,7 +1,10 @@
 {
     "name": "core/notifier",
-    "require": {},
-    "require-dev": {},
+    "require": {
+        "pusher/pusher-push-notifications": "^1.0",
+        "twilio/sdk": "6.23.0",
+        "vonage/client": "2.4.0"
+    },
     "autoload": {
         "psr-4": {
             "Core\\Notifier\\": "src/"

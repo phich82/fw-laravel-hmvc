@@ -83,3 +83,15 @@ if (!function_exists('getPushVersion')) {
         return '';
     }
 }
+
+if (!function_exists('json_encode_pretty')) {
+    /**
+     * Get version of api route
+     *
+     * @param mixed $data
+     * @return string
+     */
+    function json_encode_pretty($data) {
+        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+}
