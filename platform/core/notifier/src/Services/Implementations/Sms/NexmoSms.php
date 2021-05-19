@@ -35,7 +35,7 @@ class NexmoSms implements SmsAdapter
     public function __construct(array $data = [])
     {
         $apiKey = env('NEXMO_API_KEY'); // Your Account SID from www.twilio.com/console
-        $secret = env('NEXO_SECRET_KEY'); // Your Auth Token from www.twilio.com/console
+        $secret = env('NEXMO_SECRET_KEY'); // Your Auth Token from www.twilio.com/console
 
         if (!$this->client) {
             $basic  = new \Vonage\Client\Credentials\Basic($apiKey, $secret);
@@ -83,14 +83,14 @@ class NexmoSms implements SmsAdapter
 
             $message = $response->current();
 
-            $messages[] = $message;
+            $messages[] = (array) $message;
 
-            Log::info("[{$this->provider}][{$phoneNumber}][Send][Result] => ".json_encode_pretty($message));
+            Log::info("[{$this->provider}][{$phoneNumber}][Send][Result] => ".json_encode_pretty((array) $message));
 
             if ($message->getStatus() == 0) {
                 Log::info("[{$this->provider}][{$phoneNumber}][Send] => success");
             } else {
-                Log::error(json_encode_pretty([$message]));
+                Log::error(json_encode_pretty((array) $message));
             }
         }
 
