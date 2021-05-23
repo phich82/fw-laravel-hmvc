@@ -13,3 +13,5 @@ npm-debug.log
 yarn-error.log
 
 /.history
+/storage/cache/skype
+/**/.DS_Store

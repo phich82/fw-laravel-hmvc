@@ -42,4 +42,28 @@ class ApiController extends ApiBaseController
         return $this->responseError($response->message, $response->code);
     }
 
+    public function testPost()
+    {
+        $response = $this->http->post('uesrs', ['name' => 'Jhp Phich', 'job' => 'Design Web']);
+        dd($response);
+    }
+
+    public function testPut()
+    {
+        $response = $this->http->put('uesrs/2', ['name' => 'Jhp Phich', 'job' => 'Design Web']);
+        dd($response);
+    }
+
+    public function testPatch()
+    {
+        $response = $this->http->put('uesrs/2', ['name' => 'Jhp Phich', 'job' => 'Design Web']);
+        dd($response);
+    }
+
+    public function testDelete()
+    {
+        $response = $this->http->delete('uesrs/2');
+        dd($response);
+    }
+
 }

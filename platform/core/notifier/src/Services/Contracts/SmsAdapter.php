@@ -10,7 +10,7 @@ interface SmsAdapter extends NotifierContract
      * @param  string $to
      * @param  string $string
      * @param  array $data
-     * @return bool|void
+     * @return void|int|bool
      */
     public function makeCall($to, $from, array $options);
 }

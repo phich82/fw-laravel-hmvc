@@ -16,7 +16,7 @@ class Pusher implements PusherAdapter
      * @param  string $subject
      * @param  string $template
      * @param  mixed $data
-     * @return void|bool
+     * @return void|int|bool
      */
     public function send($subject, $template, $data)
     {
@@ -34,7 +34,7 @@ class Pusher implements PusherAdapter
 
         Log::info('Message sent to pusher: '.json_encode($reponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
-    
+
     /**
      * Config for equest
      *

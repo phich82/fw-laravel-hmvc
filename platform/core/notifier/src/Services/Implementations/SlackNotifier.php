@@ -36,7 +36,7 @@ class SlackNotifier implements NotifierContract
      * @param  string $subject
      * @param  string $template
      * @param  mixed $data
-     * @return void|bool
+     * @return void|int|bool
      */
     public function send($subject, $template, $data)
     {

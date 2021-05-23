@@ -126,7 +126,7 @@ class ModuleServiceProvider extends AbstractModuleProvider
                 // ])
                 new NexmoSms([
                     'phone_number' => ['84373850375'],
-                    'from' => 'Vonage APIs', //env('TWILIO_FROM')
+                    'from' => 'Vonage APIs', //env('NEXMO_FROM')
                 ])
             );
         });
@@ -136,10 +136,34 @@ class ModuleServiceProvider extends AbstractModuleProvider
             // return new EmailOnly(new Mailer);
 
             // Email & Slack
-            return new SlackNotifier(
-                new EmailOnly(new Mailer),
-                new Slack
+            // return new SlackNotifier(
+            //     new EmailOnly(new Mailer(config('autolog.email'))),
+            //     new Slack
+            // );
+
+            // Email, Slack & Skype
+            return new SkypeNotifier(
+                new SlackNotifier(
+                    new EmailOnly(new Mailer(config('autolog.email'))),
+                    new Slack(config('autolog.slack'))
+                ),
+                new Skype(config('autolog.skype'))
             );
+
+            // Email, Slack, Skype & sms
+            // return new SmsNotifier(
+            //     new SkypeNotifier(
+            //         new SlackNotifier(
+            //             new EmailOnly(new Mailer(config('autolog.email'))),
+            //             new Slack(config('autolog.slack'))
+            //         ),
+            //         new Skype(config('autolog.skype'))
+            //     ),
+            //     new TwilioSms([
+            //         'phone_number' => ['+84903012375', '+841673850375'],
+            //         'from' => env('TWILIO_FROM')
+            //     ])
+            // );
         });
     }
 }

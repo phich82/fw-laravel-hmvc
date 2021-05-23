@@ -10,7 +10,7 @@ interface MailerAdapter
      * @param  string $subject
      * @param  string $template
      * @param  mixed $data
-     * @return bool|void
+     * @return void|int|bool
      */
     public function send($subject, $template, $data);
 }

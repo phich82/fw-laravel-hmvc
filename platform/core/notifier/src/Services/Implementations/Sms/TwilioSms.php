@@ -22,17 +22,17 @@ class TwilioSms implements SmsAdapter
     private $provider = 'Twilio';
 
     /**
-     *
-     * @var mixed
+     * @var array
      */
     private $data;
 
     /**
      * __construct
      *
+     * @param array $data
      * @return void
      */
-    public function __construct($data = null)
+    public function __construct(array $data = [])
     {
         $sid = env('TWILIO_SID'); // Your Account SID from www.twilio.com/console
         $token = env('TWILIO_AUTH_TOKEN'); // Your Auth Token from www.twilio.com/console
@@ -58,20 +58,21 @@ class TwilioSms implements SmsAdapter
             $data = $this->data;
         }
 
-        try {
-            if (empty($data['phone_number'])) {
-                Log::info("[{$this->provider}][Send] => Phone number is empty.");
-                return null;
-            }
+        if (empty($data['phone_number'])) {
+            Log::warning("[{$this->provider}][Send] => Phone number is empty.");
+            return true;
+        }
 
-            if (!is_array($data['phone_number'])) {
-                $data['phone_number'] = [$data['phone_number']];
-            }
+        if (!is_array($data['phone_number'])) {
+            $data['phone_number'] = [$data['phone_number']];
+        }
 
-            $messages = [];
+        $success = [];
+        $failed  = [];
 
-            // Send message to specified phones
-            foreach ($data['phone_number'] as $phoneNumber) {
+        // Send message to specified phones
+        foreach ($data['phone_number'] as $phoneNumber) {
+            try {
                 $message = $this->client->messages->create(
                     $phoneNumber, //  'To' a valid phone number
                     [
@@ -80,21 +81,22 @@ class TwilioSms implements SmsAdapter
                     ]
                 );
 
-                $messages[] = $message->toArray();
+                $success[] = $phoneNumber;
 
                 Log::info("[{$this->provider}][{$phoneNumber}][Result] => ".json_encode_pretty($message->toArray()));
                 Log::info("[{$this->provider}][{$phoneNumber}][Send] => success");
+            } catch (TwilioException $e) {
+                Log::error("[{$this->provider}][Send][Error] => ".$e->getMessage());
+                $failed[] = $phoneNumber;
             }
-
-            Log::info("[{$this->provider}][Result] => ".json_encode_pretty($messages));
-            Log::info("[{$this->provider}][Send] => All messages sent.");
-
-            return $messages;
-        } catch (TwilioException $e) {
-            Log::error("[{$this->provider}][Send][Error] => ".$e->getMessage());
         }
 
-        return null;
+        if (!empty($failed)) {
+            Log::info("[{$this->provider}][Send] => Total unsent => ".count($failed));
+        }
+        Log::info("[{$this->provider}][Send] => Total sent => ".count($success));
+
+        return count($success);
     }
 
     /**
@@ -119,7 +121,7 @@ class TwilioSms implements SmsAdapter
             );
             return true;
         } catch (TwilioException $e) {
-            Log::error("[{$this->provider}][Send][Error] => ".$e->getMessage());
+            Log::error("[{$this->provider}][Send][Error] => {$e->getMessage()}");
         }
         return false;
     }

@@ -10,3 +10,7 @@ Route::get('test', function () {
 Route::get('demo', [ApiController::class, 'demo']);
 Route::get('json', [ApiController::class, 'json']);
 Route::get('users', [ApiController::class, 'getUsers']);
+Route::get('test/post', [ApiController::class, 'testPost']);
+Route::get('test/put', [ApiController::class, 'testPut']);
+Route::get('test/patch', [ApiController::class, 'testPatch']);
+Route::get('test/delete', [ApiController::class, 'testDelete']);

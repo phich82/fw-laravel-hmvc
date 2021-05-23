@@ -64,7 +64,7 @@ class Sms implements SmsAdapter
      * @param  string $subject
      * @param  string $template
      * @param  mixed $data
-     * @return void|bool
+     * @return void|int|bool
      */
     public function send($subject, $template, $data)
     {
@@ -80,7 +80,7 @@ class Sms implements SmsAdapter
     {
         return $this->client->makeCall($to, $from, $options);
     }
-    
+
     /**
      * Resolve namespace of sms concrete classes
      *

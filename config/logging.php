@@ -149,14 +149,7 @@ return [
                 'callable' => function (array $error) {
                     $subject = "[{$error['level_name']}]Error Log System";
                     $template = 'error';
-                    $data = $error + [
-                        'from' => '',
-                        'from_name' => '',
-                        'to' => '',
-                        'to_name' => '',
-                        'cc' => '',
-                        'bcc' => '',
-                    ];
+                    $data = $error + config('autolog.email');
                     return [$subject, $template, $data];
                 },
             ],

@@ -21,7 +21,6 @@ class NexmoSms implements SmsAdapter
     private $provider = 'Nexmo';
 
     /**
-     *
      * @var mixed
      */
     private $data;
@@ -70,34 +69,42 @@ class NexmoSms implements SmsAdapter
             $data['phone_number'] = [$data['phone_number']];
         }
 
-        $messages = [];
+        $success = [];
+        $failed  = [];
 
         foreach ($data['phone_number'] as $phoneNumber) {
-            $text = new \Vonage\SMS\Message\SMS(
-                $phoneNumber,
-                $data['from'] ?? env('NEXMO_FROM'),
-                $subject ?? $data['message'] ?? ''
-            );
+            try {
+                $text = new \Vonage\SMS\Message\SMS(
+                    $phoneNumber,
+                    $data['from'] ?? env('NEXMO_FROM'),
+                    $subject ?? $data['message'] ?? ''
+                );
 
-            $response = $this->client->sms()->send($text);
+                $response = $this->client->sms()->send($text);
 
-            $message = $response->current();
+                $message = $response->current();
 
-            $messages[] = (array) $message;
+                Log::info("[{$this->provider}][{$phoneNumber}][Send][Result] => ".json_encode_pretty((array) $message));
 
-            Log::info("[{$this->provider}][{$phoneNumber}][Send][Result] => ".json_encode_pretty((array) $message));
-
-            if ($message->getStatus() == 0) {
-                Log::info("[{$this->provider}][{$phoneNumber}][Send] => success");
-            } else {
-                Log::error(json_encode_pretty((array) $message));
+                if ($message->getStatus() == 0) {
+                    $success[] = $phoneNumber;
+                    Log::info("[{$this->provider}][{$phoneNumber}][Send] => success");
+                } else {
+                    $failed[] = $phoneNumber;
+                    Log::info("[{$this->provider}][{$phoneNumber}][Send] => failed");
+                }
+            } catch (Exception $e) {
+                Log::error(__CLASS__.':'.__FUNCTION__."[{$phoneNumber}][Error] => {$e->getMessage()}");
+                $failed[] = $phoneNumber;
             }
         }
 
-        Log::info("[{$this->provider}][Result] => ".json_encode_pretty($messages));
-        Log::info("[{$this->provider}][Send] => All sent.");
+        if (!empty($failed)) {
+            Log::info("[{$this->provider}][Send] => Total unsent => ".count($failed));
+        }
+        Log::info("[{$this->provider}][Send] => Total sent => ".count($success));
 
-        return $messages;
+        return count($success);
     }
 
     /**
