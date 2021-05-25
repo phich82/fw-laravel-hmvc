@@ -1,13 +1,15 @@
 <?php
 
-use Core\Notifier\Services\Contracts\LogNotifierContract;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
-use Core\Notifier\Services\Contracts\NotifierContract;
-use Core\Notifier\Services\Contracts\SmsAdapter;
-use Core\Notifier\Services\Implementations\Skype\SkypePHP;
 use Core\Notifier\Services\Implementations\Sms;
+use Core\Notifier\Services\Contracts\SmsAdapter;
+use Core\Notifier\Services\Contracts\NotifierContract;
 use Core\Notifier\Services\Implementations\Sms\NexmoSms;
+use Core\Notifier\Services\Contracts\LogNotifierContract;
+use Core\Notifier\Services\Implementations\Skype\SkypePHP;
+use Illuminate\Support\Facades\Bus;
 
 /*
 |--------------------------------------------------------------------------
@@ -105,4 +107,34 @@ Route::get('/skype', function () {
         // $skype->getMessagesList($skypeId2),
         // $skype->logout(),
     );
+});
+
+Route::get('/slack', function () {
+    $settings = [
+        'username' => 'System',
+        'channel' => '#general',
+        'link_names' => true
+    ];
+    $slack = new \Maknz\Slack\Client(env('SLACK_WEBHOOK'), $settings);
+    foreach (['@dev2nguyenphat82', '@jhphich82'] as $to) {
+        $client = $slack->to('#develop');
+        $client = $client->withIcon(':ghost:');
+        $client->to($to);
+        $client->send('Hello Jhp Phich!');
+    }
+    dd('Slack Test.');
+});
+
+Route::get('/dispatch', function () {
+
+    dispatch(function () {
+        // sleep(2);
+        Log::info('[Dispatch] => 1');
+    });
+    dispatch(function () {
+        // sleep(2);
+        Log::info('[Dispatch] => 2');
+    });
+    Log::info('[Dispatch] => Test');
+    dd('Dispatch Test.');
 });
