@@ -15,7 +15,31 @@ return [
         'attachments' => []
     ],
     'slack' => [
-
+        'channel' => '#develop',
+        'from' => 'System Log',
+        'to' => [
+            '@dev2nguyenphat82',
+            '@jhphich82',
+        ],
+        'icon' => ':ghost:',
+        'attachment' => [
+            'fallback' => 'Server health: good',
+            'text' => 'Server health: good',
+            'color' => 'danger',
+            // 'fields' => [
+            //     [
+            //         'title' => 'CPU usage',
+            //         'value' => '90%',
+            //         'short' => true // whether the field is short enough to sit side-by-side other fields, defaults to false
+            //     ],
+            //     [
+            //         'title' => 'RAM usage',
+            //         'value' => '2.5GB of 4GB',
+            //         'short' => true
+            //     ],
+            // ],
+        ],
+        'message' => 'New alert from the monitoring system',
     ],
     'skype' => [
         'username' => env('SKYPE_USERNAME'),

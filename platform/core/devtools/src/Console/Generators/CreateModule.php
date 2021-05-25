@@ -15,6 +15,8 @@ class CreateModule extends Command
 
     const TYPE_PLUGINS = 'plugins';
 
+    const TYPE_PACKAGES = 'packages';
+
     const TYPE_THEMES = 'themes';
 
     /**
@@ -46,6 +48,7 @@ class CreateModule extends Command
     protected $acceptedTypes = [
         self::TYPE_CORE => 'Core',
         self::TYPE_PLUGINS => 'Plugins',
+        self::TYPE_PACKAGES => 'Packages',
         self::TYPE_THEMES => 'Themes',
     ];
 
@@ -70,7 +73,7 @@ class CreateModule extends Command
      */
     public function handle()
     {
-        $this->moduleType = $this->ask('Your module type. Accepted: core, plugins, themes.', self::TYPE_PLUGINS);
+        $this->moduleType = $this->ask('Your module type. Accepted: core, plugins, packages, themes.', self::TYPE_PLUGINS);
 
         if (!in_array($this->moduleType, array_keys($this->acceptedTypes))) {
             $this->moduleType = self::TYPE_PLUGINS;

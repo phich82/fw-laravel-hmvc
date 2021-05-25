@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3e8e4b6e8f248d76264b6383cb33769f",
+    "content-hash": "36ffc0bfacc1b1f10b7b8cf9f78b7696",
     "packages": [
         {
             "name": "api/v1",
@@ -2278,6 +2278,56 @@
                 "source": "https://github.com/opis/closure/tree/3.6.2"
             },
             "time": "2021-04-09T13:42:10+00:00"
+        },
+        {
+            "name": "packages/maknz-slack",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./platform/packages/maknz-slack",
+                "reference": "89ff7b2a75379a326f48f3db839912f38511a44e"
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "guzzlehttp/guzzle": "~7.0|~6.0|~5.0|~4.0",
+                "php": ">=5.5.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "0.9.*",
+                "phpunit/phpunit": "4.2.*"
+            },
+            "suggest": {
+                "guzzlehttp/guzzle": "Required (~7.0) for Laravel 7|8 support",
+                "maknz/slack-laravel": "Required for Laravel support",
+                "nexylan/slack-bundle": "Required for Symfony bundle support"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Maknz\\Slack\\": "src/"
+                }
+            },
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "maknz",
+                    "email": "github@mak.geek.nz"
+                },
+                {
+                    "name": "phat",
+                    "email": "nguyenphat82@gmail.com"
+                }
+            ],
+            "description": "A simple PHP package for sending messages to Slack, with a focus on ease of use and elegant syntax.",
+            "keywords": [
+                "laravel",
+                "slack"
+            ],
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "phpoption/phpoption",
