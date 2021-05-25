@@ -1,9 +1,11 @@
 {
     "name": "core/notifier",
     "require": {
-        "pusher/pusher-push-notifications": "^1.0",
+        "laravel/slack-notification-channel": "^2.3",
+        "pusher/pusher-push-notifications": "1.1.2",
         "twilio/sdk": "6.23.0",
-        "vonage/client": "2.4.0"
+        "vonage/client": "2.4.0",
+        "ricwein/push-notifications": "^3.0"
     },
     "autoload": {
         "psr-4": {

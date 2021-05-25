@@ -7,30 +7,14 @@ use Core\Notifier\Services\Contracts\SkypeAdapter;
 use Core\Notifier\Services\Implementations\Skype\SkypePHP;
 use Exception;
 
-class Skype implements SkypeAdapter
+class Skype extends BaseNotifier implements SkypeAdapter
 {
-    /**
-     * @var array
-     */
-    private $data = [];
-
     /**
      * Provider name
      *
      * @var string
      */
-    private $provider = 'Skype';
-
-    /**
-     * __construct
-     *
-     * @param  array $data
-     * @return void
-     */
-    public function __construct(array $data = [])
-    {
-        $this->data = $data;
-    }
+    protected $provider = 'Skype';
 
     /**
      * @implement
@@ -71,7 +55,7 @@ class Skype implements SkypeAdapter
             }
         } catch (Exception $e) {
             $failed[] = $currentSkypeId;
-            Log::error(__CLASS__.':'.__FUNCTION__."[{$currentSkypeId}][Error] => {$e->getMessage()}");
+            Log::error("[{$this->provider}][".__CLASS__.':'.__FUNCTION__."][{$currentSkypeId}][Error] => {$e->getMessage()}");
         }
 
         if (!empty($failed)) {

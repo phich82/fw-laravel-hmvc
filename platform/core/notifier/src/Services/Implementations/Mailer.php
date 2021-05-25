@@ -8,23 +8,12 @@ use Illuminate\Support\Facades\Mail;
 use Core\Notifier\Services\Contracts\MailerAdapter;
 use Exception;
 
-class Mailer implements MailerAdapter
+class Mailer extends BaseNotifier implements MailerAdapter
 {
     /**
-     * @var array
+     * @var string
      */
-    private $data = [];
-
-    /**
-     * __construct
-     *
-     * @param array $data
-     * @return void
-     */
-    public function __construct(array $data = [])
-    {
-        $this->data = $data;
-    }
+    protected $provider = 'Gmail';
 
     /**
      * @implement
@@ -59,29 +48,42 @@ class Mailer implements MailerAdapter
         $fromAddress = $data['from'] ?? env('MAIL_FROM_ADDRESS');
         $fromName = $data['from_name'] ?? env('MAIL_FROM_NAME');
 
+        $success = [];
+        $failed  = [];
+
         try {
-            Mail::raw($body, function (Message $message) use ($subject, $fromAddress, $fromName, $listTo, $listCc, $listBcc) {
+            Mail::raw($body, function (Message $message) use ($subject, $fromAddress, $fromName, $listTo, $listCc, $listBcc, &$success) {
                 $message->subject($subject);
                 $message->from($fromAddress, $fromName);
 
                 foreach ($listTo as $to) {
                     $to = !is_array($to) ? [$to] : $to;
+                    $success[] = $to;
                     $message->to(...$to);
                 }
                 foreach ($listCc as $cc) {
                     $cc = !is_array($cc) ? [$cc] : $cc;
+                    $success[] = $cc;
                     $message->cc(...$cc);
                 }
                 foreach ($listBcc as $bcc) {
                     $bcc = !is_array($bcc) ? [$bcc] : $bcc;
+                    $success[] = $bcc;
                     $message->bcc(...$bcc);
                 }
             });
-            Log::info('All emails sent.');
-            return true;
+            // Log::info("[{$this->provider}][{$to}][Send] => success");
         } catch (Exception $e) {
-            Log::error(__CLASS__.':'.__FUNCTION__."[Error] => {$e->getMessage()}");
+            // $failed[] = $to;
+            // Log::error(__CLASS__.':'.__FUNCTION__."[{$to}][Error] => {$e->getMessage()}");
+            Log::error("[{$this->provider}][".__CLASS__.':'.__FUNCTION__."][Error] => {$e->getMessage()}");
         }
-        return false;
+
+        if (!empty($failed)) {
+            Log::info("[{$this->provider}][Send] => Total unsent => ".count($failed));
+        }
+        Log::info("[{$this->provider}][Send] => Total sent => ".count($success));
+
+        return count($success);
     }
 }
