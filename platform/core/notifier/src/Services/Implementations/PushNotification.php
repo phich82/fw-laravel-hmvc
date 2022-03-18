@@ -6,7 +6,6 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Core\Notifier\Services\Implementations\Push\Push;
 use Core\Notifier\Services\Contracts\PushNotificationAdapter;
-use ricwein\PushNotification\Exceptions\ResponseReasonException;
 
 class PushNotification extends BaseNotifier implements PushNotificationAdapter
 {
@@ -48,10 +47,11 @@ class PushNotification extends BaseNotifier implements PushNotificationAdapter
             }
             $success = array_diff($deviceTokens, $failed);
         } catch (Exception $e) {
-            Log::error("[{$this->provider}][".__CLASS__.':'.__FUNCTION__."][{$currentSkypeId}][Error] => {$e->getMessage()}");
+            Log::error("[{$this->provider}][".__CLASS__.':'.__FUNCTION__."][Error] => {$e->getMessage()}");
         }
 
         if (!empty($failed)) {
+            Log::info("[{$this->provider}][Tokens Failed] => ".json_encode_pretty($failed));
             Log::info("[{$this->provider}][Send] => Total unsent => ".count($failed));
         }
         Log::info("[{$this->provider}][Send] => Total sent => ".count($success));

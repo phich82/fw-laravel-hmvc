@@ -4,11 +4,11 @@ namespace Core\Notifier\Services\Implementations\Push;
 
 use Pushok\AuthProvider\Token;
 use ricwein\PushNotification\Config;
+use ricwein\PushNotification\Result;
 use ricwein\PushNotification\Message;
 use ricwein\PushNotification\Handler\FCM;
 use ricwein\PushNotification\Handler\APNS;
 use ricwein\PushNotification\PushNotification;
-use ricwein\PushNotification\Result;
 
 class Push
 {
@@ -30,7 +30,7 @@ class Push
     /**
      * Alias of fcm() method
      *
-     * @return \ricwein\PushNotification\PushNotification
+     * @return \Core\Notifier\Services\Implementations\Push
      */
     public function android()
     {
@@ -40,7 +40,7 @@ class Push
     /**
      * Use FCM
      *
-     * @return \ricwein\PushNotification\PushNotification
+     * @return \Core\Notifier\Services\Implementations\Push
      */
     public function fcm()
     {
@@ -64,7 +64,10 @@ class Push
     private function sendFCM($data = [])
     {
         $message = new Message($data['message'], $data['title'], ['payload' => $data['payload']]);
-        $deviceTokens = array_map(fn ($deviceToken) => [$deviceToken => 'fcm'], $data['devvice_tokens']);
+        $deviceTokens = array_reduce($data['device_tokens'], function ($carry, $deviceToken) {
+            $carry[$deviceToken] = 'fcm';
+            return $carry;
+        }, []);
 
         return $this->fcm->send($message, $deviceTokens);
     }
@@ -72,7 +75,7 @@ class Push
     /**
      * Alias of apns() method
      *
-     * @return \ricwein\PushNotification\PushNotification
+     * @return \Core\Notifier\Services\Implementations\Push
      */
     public function ios()
     {
@@ -82,7 +85,7 @@ class Push
     /**
      * Use APNS
      *
-     * @return \ricwein\PushNotification\PushNotification
+     * @return \Core\Notifier\Services\Implementations\Push
      */
     public function apns($data = [])
     {
@@ -120,7 +123,8 @@ class Push
     {
         if ($this->provider) {
             $PROVIDER = strtoupper($this->provider);
-            $result = $this->{"send{$PROVIDER}"}($data);
+            $send = "send{$PROVIDER}";
+            $result = $this->{$send}($data);
             $this->provider = null;
 
             return $result;
@@ -164,7 +168,7 @@ class Push
      */
     private static function fcmAuthToken()
     {
-        return 'ExampleGooglePushToken12345678987654321';
+        return env('GOOGLE_FCM_SERVER_KEY');
     }
 
     /**
@@ -175,11 +179,11 @@ class Push
     private static function apnsAuthToken()
     {
         return Token::create([
-            'key_id' => 'AAAABBBBCC', // The Key ID obtained from Apple developer account
-            'team_id' => 'DDDDEEEEFF', // The Team ID obtained from Apple developer account
-            'app_bundle_id' => 'com.app.Test', // The bundle ID for app obtained from Apple developer account
-            'private_key_path' => __DIR__ . '/private_key.p8', // Path to private key
-            'private_key_secret' => null // Private key secret
+            'key_id' => env('APPLE_KEY_ID'), // The Key ID obtained from Apple developer account
+            'team_id' => env('APPLE_TEAM_ID'), // The Team ID obtained from Apple developer account
+            'app_bundle_id' => env('APPLE_APP_BUNDLE_ID'), // The bundle ID for app obtained from Apple developer account
+            'private_key_path' => env('APPLE_PRIVATE_KEY_PATH'), // Path to private key
+            'private_key_secret' => env('APPLE_PRIVATE_KEY_SECRECT') // Private key secret
         ]);
     }
 }

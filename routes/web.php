@@ -8,6 +8,7 @@ use Core\Notifier\Services\Contracts\SmsAdapter;
 use Core\Notifier\Services\Contracts\NotifierContract;
 use Core\Notifier\Services\Implementations\Sms\NexmoSms;
 use Core\Notifier\Services\Contracts\LogNotifierContract;
+use Core\Notifier\Services\Implementations\Push\Push;
 use Core\Notifier\Services\Implementations\Skype\SkypePHP;
 use Illuminate\Support\Facades\Bus;
 
@@ -137,4 +138,21 @@ Route::get('/dispatch', function () {
     });
     Log::info('[Dispatch] => Test');
     dd('Dispatch Test.');
+});
+
+Route::get('/push', function () {
+    $push = (new Push)->fcm()->send([
+        'title' => 'Test Title',
+        'message' => 'Test Message',
+        'payload' => [
+            'data' => 'Test'
+        ],
+        'device_tokens' => [
+            'fYA0rOPpQlap-LKkgjVJZ_:APA91bGFIL0i95s3aVmSTpKBPilaZ031llVze2fu2Lr6VxNWKsEjUMPOIoBwX7mgRLEm7rIMgJwHpts0bmT3DTUNIWth1O1XOFSx_ZkXw1WMrrHOD4676fl4dbyomaMaT-KUwO9AXiG4'
+        ]
+    ]);
+    $failed = $push->getFailed();
+    $error = array_shift($failed);
+    dd($error->getMessage());
+    dd('Push Notification Test.');
 });
