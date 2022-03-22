@@ -44,7 +44,7 @@ class Skype extends BaseNotifier implements SkypeAdapter
         $currentSkypeId = null;
 
         try {
-            $skype->login($data['username'], $data['password']) or die('Login failed');
+            $skype->login(env('SKYPE_USERNAME', $data['username']), env('SKYPE_PASSWORD', $data['password'])) or die('Login failed');
 
             $listTo = $data['to'] ?? [];
             foreach ($listTo as $skypeId) {

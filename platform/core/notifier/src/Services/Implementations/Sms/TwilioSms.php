@@ -2,7 +2,6 @@
 
 namespace Core\Notifier\Services\Implementations\Sms;
 
-use Twilio\Rest\Client;
 use Illuminate\Support\Facades\Log;
 use Twilio\Exceptions\TwilioException;
 use Core\Notifier\Services\Contracts\SmsAdapter;
@@ -19,7 +18,7 @@ class TwilioSms implements SmsAdapter
      *
      * @var string
      */
-    private $provider = 'Twilio';
+    public $provider = 'Twilio';
 
     /**
      * @var array
@@ -38,7 +37,10 @@ class TwilioSms implements SmsAdapter
         $token = env('TWILIO_AUTH_TOKEN'); // Your Auth Token from www.twilio.com/console
 
         if (!$this->client) {
-            $this->client = new Client($sid, $token);
+            $this->client = new \Twilio\Rest\Client($sid, $token);
+            if (env('APP_DEBUG')) {
+                $this->client->setLogLevel('debug');
+            }
         }
 
         $this->data = $data;
@@ -64,7 +66,7 @@ class TwilioSms implements SmsAdapter
         }
 
         if (!is_array($data['phone_number'])) {
-            $data['phone_number'] = [$data['phone_number']];
+            $data['phone_number'] = explode(',', $data['phone_number']);
         }
 
         $success = [];
@@ -72,6 +74,7 @@ class TwilioSms implements SmsAdapter
 
         // Send message to specified phones
         foreach ($data['phone_number'] as $phoneNumber) {
+            $phoneNumber = trim($phoneNumber);
             try {
                 $message = $this->client->messages->create(
                     $phoneNumber, //  'To' a valid phone number
@@ -81,10 +84,11 @@ class TwilioSms implements SmsAdapter
                     ]
                 );
 
-                $success[] = $phoneNumber;
-
                 Log::info("[{$this->provider}][{$phoneNumber}][Result] => ".json_encode_pretty($message->toArray()));
-                Log::info("[{$this->provider}][{$phoneNumber}][Send] => success");
+                if ($message->sid) {
+                    $success[] = $phoneNumber;
+                    Log::info("[{$this->provider}][{$phoneNumber}][Send] => success");
+                }
             } catch (TwilioException $e) {
                 Log::error("[{$this->provider}][Send][Error] => ".$e->getMessage());
                 $failed[] = $phoneNumber;

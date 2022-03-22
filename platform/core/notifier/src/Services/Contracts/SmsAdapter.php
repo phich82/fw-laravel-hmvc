@@ -5,7 +5,7 @@ namespace Core\Notifier\Services\Contracts;
 interface SmsAdapter extends NotifierContract
 {
     /**
-     * Send message
+     * Make a call
      *
      * @param  string $to
      * @param  string $string

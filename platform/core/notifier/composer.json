@@ -5,7 +5,10 @@
         "pusher/pusher-push-notifications": "1.1.2",
         "twilio/sdk": "6.23.0",
         "vonage/client": "2.4.0",
-        "ricwein/push-notifications": "^3.0"
+        "ricwein/push-notifications": "^2.4.7",
+        "edamov/pushok": "^0.13.0",
+        "spomky-labs/base64url": "^2.0.4",
+        "minishlink/web-push": "^6.0.7"
     },
     "autoload": {
         "psr-4": {

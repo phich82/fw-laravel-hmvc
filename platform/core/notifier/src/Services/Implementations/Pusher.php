@@ -47,21 +47,19 @@ class Pusher implements PusherAdapter
             'fcm' => [
                 'notification' => [
                     'title' => $data['title'],
-                    'body' => $data['body'],
+                    'body'  => $data['body'],
                 ],
-                'data' => [
-                    'test' => 'test'
-                ],
+                'data' => $data['data'] ?? [],
             ],
             'apns' => [
                 'aps' => [
                     "content-available" => 1, // background update notification
                     'alert' => [
                         'title' => $data['title'],
-                        'body' => $data['body'],
+                        'body'  => $data['body'],
                     ],
-                    "badge" => 9,
-                    "sound" => "sound.mp3",
+                    "badge" => $data['badge'] ?? 9,
+                    "sound" => $data['sound'] ?? null,
                 ],
             ],
             'web' => [

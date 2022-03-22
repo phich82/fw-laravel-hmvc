@@ -19,7 +19,7 @@ class PushNotification extends BaseNotifier implements PushNotificationAdapter
     /**
      * @implement
      *
-     * Send message to slack
+     * Send notification to mobile devices
      *
      * @param  string $subject
      * @param  string $template
@@ -32,30 +32,30 @@ class PushNotification extends BaseNotifier implements PushNotificationAdapter
             $data = $this->data;
         }
 
-        $success = [];
-        $failed  = [];
+        $successDeviceTokens = [];
+        $failedDeviceTokens  = [];
 
         // Package for send message to mobile devices (android, ios)
         try {
             $result = (new Push)->send($data);
 
             // Get device tokens failed
-            $failed = $result->getInvalidDeviceTokes();
+            $failedDeviceTokens = is_array($result) && count($result) > 0 ? array_keys($result) : [];
             $deviceTokens = $data['device_tokens'];
             if (isset($deviceTokens['ios']) && isset($deviceTokens['android'])) {
                 $deviceTokens = array_merge($deviceTokens['ios'], $deviceTokens['android']);
             }
-            $success = array_diff($deviceTokens, $failed);
+            $successDeviceTokens = array_diff($deviceTokens, $failedDeviceTokens);
         } catch (Exception $e) {
             Log::error("[{$this->provider}][".__CLASS__.':'.__FUNCTION__."][Error] => {$e->getMessage()}");
         }
 
-        if (!empty($failed)) {
-            Log::info("[{$this->provider}][Tokens Failed] => ".json_encode_pretty($failed));
-            Log::info("[{$this->provider}][Send] => Total unsent => ".count($failed));
+        if (!empty($failedDeviceTokens)) {
+            Log::info("[{$this->provider}][Tokens Failed] => ".json_encode_pretty($failedDeviceTokens));
+            Log::info("[{$this->provider}][Send] => Total unsent => ".count($failedDeviceTokens));
         }
-        Log::info("[{$this->provider}][Send] => Total sent => ".count($success));
+        Log::info("[{$this->provider}][Send] => Total sent => ".count($successDeviceTokens));
 
-        return count($success);
+        return count($successDeviceTokens);
     }
 }

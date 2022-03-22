@@ -1,0 +1,6 @@
+{
+    "/js/app.js": "/js/app.js",
+    "/js/webpush.js": "/js/webpush.js",
+    "/service-worker.js": "/service-worker.js",
+    "/css/app.css": "/css/app.css"
+}

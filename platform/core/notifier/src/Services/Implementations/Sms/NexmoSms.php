@@ -9,7 +9,7 @@ use Exception;
 class NexmoSms implements SmsAdapter
 {
     /**
-     * @var \Twilio\Rest\Client
+     * @var \Vonage\Client
      */
     private $client;
 
@@ -18,7 +18,7 @@ class NexmoSms implements SmsAdapter
      *
      * @var string
      */
-    private $provider = 'Nexmo';
+    public $provider = 'Nexmo';
 
     /**
      * @var mixed
@@ -39,7 +39,7 @@ class NexmoSms implements SmsAdapter
         if (!$this->client) {
             $basic  = new \Vonage\Client\Credentials\Basic($apiKey, $secret);
             $this->client = new \Vonage\Client($basic, [
-                'base_api_url' => 'rest.nexmo.com'
+                'base_api_url' => 'rest.nexmo.com', //https://api.nexmo.com
             ]);
         }
 
@@ -66,16 +66,17 @@ class NexmoSms implements SmsAdapter
         }
 
         if (!is_array($data['phone_number'])) {
-            $data['phone_number'] = [$data['phone_number']];
+            $data['phone_number'] = explode(',', $data['phone_number']);
         }
 
         $success = [];
         $failed  = [];
 
         foreach ($data['phone_number'] as $phoneNumber) {
+            $phoneNumber = trim($phoneNumber);
             try {
                 $text = new \Vonage\SMS\Message\SMS(
-                    $phoneNumber,
+                    trim($phoneNumber, '+'),
                     $data['from'] ?? env('NEXMO_FROM'),
                     $subject ?? $data['message'] ?? ''
                 );
@@ -119,4 +120,5 @@ class NexmoSms implements SmsAdapter
     {
         //
     }
+
 }

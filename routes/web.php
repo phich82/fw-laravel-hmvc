@@ -1,16 +1,19 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
 use Core\Notifier\Services\Implementations\Sms;
 use Core\Notifier\Services\Contracts\SmsAdapter;
+use Core\Notifier\Services\Implementations\Push\Push;
 use Core\Notifier\Services\Contracts\NotifierContract;
+use Core\Notifier\Services\Implementations\Push\WebPush;
 use Core\Notifier\Services\Implementations\Sms\NexmoSms;
 use Core\Notifier\Services\Contracts\LogNotifierContract;
-use Core\Notifier\Services\Implementations\Push\Push;
+use Core\Notifier\Services\Implementations\Sms\TwilioSms;
 use Core\Notifier\Services\Implementations\Skype\SkypePHP;
-use Illuminate\Support\Facades\Bus;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,10 +31,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/sms', function (SmsAdapter $sms) {
-    dd(new Sms(new NexmoSms()), Sms::nexmo(['xxx']));
-    //$message = $sms->send('Message from Twilio', '', ['phone_number' => '+84903012375']);
-    //dd('Send sms.', $message);
+Route::get('/sms/{phone?}', function ($phone = '+84373850375', SmsAdapter $sms) {
+    $sms = Sms::twilio();// new Sms(new TwilioSms()); // new Sms(new NexmoSms(); //Sms::nexmo(); //Sms::twilio();
+    $message = $sms->send("Message from {$sms->provider}: ".date('Y-m-d H:i:s'), '', ['phone_number' => $phone]);
+    echo "Sms sent to [{$phone}]: ".($message ? 'success' : 'error');
 });
 
 Route::get('/api/v1/test/error', function () {
@@ -155,4 +158,73 @@ Route::get('/push', function () {
     $error = array_shift($failed);
     dd($error->getMessage());
     dd('Push Notification Test.');
+});
+
+/** Register device tokens or endpoint */
+Route::post('/register-push-notification', function () {
+    $params = request()->all();
+    if (!empty($params) && $params['subscription']['endpoint']) {
+        $row = DB::table('device_tokens')->where(['endpoint' => $params['subscription']['endpoint'], 'type' => 3])->first();
+        if (empty($row)) {
+            $result = DB::table('device_tokens')->insert([
+                'endpoint'     => $params['subscription']['endpoint'],
+                'expiry'       => $params['subscription']['expirationTime'],
+                'subscription' => json_encode($params['subscription']),
+                'ip'           => $params['ip'],
+                'browser'      => $params['browser'],
+                'type'         => 3, // 1: android, 2: ios, 3: web
+                'track_log'    => 'Insert:System:'.date('Y-m-d H:i:s'),
+                'created_at'   => date('Y-m-d H:i:s'),
+                ]);
+            return response()->json([
+                'success' => $result,
+                'action'  => 'insert'
+            ]);
+        } else {
+            $result = DB::table('device_tokens')->where(['endpoint' => $params['subscription']['endpoint'], 'type' => 3])->update([
+                'expiry'       => $params['subscription']['expirationTime'],
+                'subscription' => json_encode($params['subscription']),
+                'ip'           => $params['ip'],
+                'browser'      => $params['browser'],
+                'track_log'    => $row->track_log."\nUpdate:System:".date('Y-m-d H:i:s'),
+                'updated_at'   => date('Y-m-d H:i:s'),
+            ]);
+            return response()->json([
+                'success' => !!$result,
+                'action'  => 'update'
+            ]);
+        }
+    }
+
+    return response()->json([
+        'success' => false,
+        'error' => 'Missing the endpoint key or empty.'
+    ]);
+});
+Route::get('/sendpush', function () {
+    $rows = DB::table('device_tokens')->where(['type' => 3])->get()->toArray();
+    $webpush = new WebPush;
+    $errors = [];
+    foreach ($rows as $row) {
+        $result = $webpush->send([
+            'subscription' => json_decode($row->subscription, true),
+            'payload' => [
+                'title' => 'Notification Test',
+                'body'  => "Hello! 👋.\nThis is webpush message: ".date('Y-m-d H:i:s'),
+                'icon'  => "https://picsum.photos/64",
+                'image' => "https://picsum.photos/200",
+                'badge' => "https://picsum.photos/32",
+                'sound' => "http://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+                'lang'  => 'en-US',
+                'tag'   => null,
+                'data'  => null,
+                'vibrate' => true,
+                'requireInteraction' => false,
+            ]
+        ]);
+        if ($result) {
+            $errors[] = $result;
+        }
+    }
+    echo 'Pushed: '.(count($rows) - count($errors));
 });

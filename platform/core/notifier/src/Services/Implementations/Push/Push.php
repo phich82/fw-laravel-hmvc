@@ -9,6 +9,7 @@ use ricwein\PushNotification\Message;
 use ricwein\PushNotification\Handler\FCM;
 use ricwein\PushNotification\Handler\APNS;
 use ricwein\PushNotification\PushNotification;
+use ricwein\PushNotification\Exceptions\ResponseReasonException;
 
 class Push
 {
@@ -26,6 +27,9 @@ class Push
      * @var string
      */
     private $provider = null;
+
+    private const FCM = 'fcm';
+    private const APNS = 'apns';
 
     /**
      * Alias of fcm() method
@@ -59,17 +63,28 @@ class Push
      *      'payload' => <array>,
      *      'devvice_tokens' => <array>
      * ]
-     * @return \ricwein\PushNotification\Result
+     * @return null||array [null: success, array: error]
      */
     private function sendFCM($data = [])
     {
         $message = new Message($data['message'], $data['title'], ['payload' => $data['payload']]);
+        // Set sound, badge, priority
+        if (!empty($data['sound'])) {
+            $message->setSound($data['sound']);
+        }
+        if (!empty($data['badge']) && is_int($data['badge'])) {
+            $message->setBadge($data['badge']);
+        }
+        if (!empty($data['priority']) && in_array($data['priority'], [Config::PRIORITY_NORMAL, Config::PRIORITY_HIGH], true)) {
+            $message->setPriority($data['priority']);
+        }
+
         $deviceTokens = array_reduce($data['device_tokens'], function ($carry, $deviceToken) {
-            $carry[$deviceToken] = 'fcm';
+            $carry[$deviceToken] = static::FCM;
             return $carry;
         }, []);
 
-        return $this->fcm->send($message, $deviceTokens);
+        return $this->_resolveResponse($this->fcm->send($message, $deviceTokens));
     }
 
     /**
@@ -90,7 +105,9 @@ class Push
     public function apns($data = [])
     {
         $this->provider = 'apns';
-        $this->apns = new PushNotification(['apns' => new APNS(self::apnsAuthToken(), Config::ENV_PRODUCTION)]);
+        $this->apns = new PushNotification([
+            'apns' => new APNS(self::apnsAuthToken(), self::apnsEnv(), self::apnsCertPath())
+        ]);
 
         return $this;
     }
@@ -103,14 +120,25 @@ class Push
      *      'title'   => <string>,
      *      'payload' => <array>
      * ]
-     * @return \ricwein\PushNotification\Result
+     * @return null|array [null: success, array: error]
      */
     private function sendAPNS($data = [])
     {
         $message = new Message($data['message'], $data['title'], ['payload' => $data['payload']]);
-        $deviceTokens = array_map(fn ($deviceToken) => [$deviceToken => 'apns'], $data['device_tokens']);
+        // Set sound, badge, priority
+        if (!empty($data['sound'])) {
+            $message->setSound($data['sound']);
+        }
+        if (!empty($data['badge']) && is_int($data['badge'])) {
+            $message->setBadge($data['badge']);
+        }
+        if (!empty($data['priority']) && in_array($data['priority'], [Config::PRIORITY_NORMAL, Config::PRIORITY_HIGH], true)) {
+            $message->setPriority($data['priority']);
+        }
 
-        return $this->apns->send($message, $deviceTokens);
+        $deviceTokens = array_map(fn ($deviceToken) => [$deviceToken => static::APNS], $data['device_tokens']);
+
+        return $this->_resolveResponse($this->apns->send($message, $deviceTokens));
     }
 
     /**
@@ -131,22 +159,32 @@ class Push
         }
 
         $push = new PushNotification([
-            'fcm' => new FCM(self::fcmAuthToken()),
-            'apns' => new APNS(self::apnsAuthToken(), Config::ENV_PRODUCTION),
+            static::FCM => new FCM(self::fcmAuthToken()),
+            static::APNS => new APNS(self::apnsAuthToken(), self::apnsEnv(), self::apnsCertPath()),
         ]);
         $message = new Message($data['message'], $data['title'], ['payload' => $data['payload']]);
+        // Set sound, badge, priority
+        if (!empty($data['sound'])) {
+            $message->setSound($data['sound']);
+        }
+        if (!empty($data['badge']) && is_int($data['badge'])) {
+            $message->setBadge($data['badge']);
+        }
+        if (!empty($data['priority']) && in_array($data['priority'], [Config::PRIORITY_NORMAL, Config::PRIORITY_HIGH], true)) {
+            $message->setPriority($data['priority']);
+        }
 
         // Mapping device tokens to handlers
         $deviceTokensData = $data['device_tokens'];
         if (!isset($deviceTokensData['android']) && !isset($deviceTokensData['ios'])) {
             $deviceTokens = array_map(
-                fn ($deviceToken) => [$deviceToken => strlen($deviceToken) === 32 ? 'apns' : 'fcm'],
+                fn ($deviceToken) => [$deviceToken => strlen($deviceToken) === 32 ? static::APNS : static::FCM],
                 $deviceTokensData
             );
         } else {
             $deviceTokens = [];
             foreach ($deviceTokensData as $key => $tokens) {
-                $handler = $key == 'ios' ? 'apns' : 'fcm';
+                $handler = $key == 'ios' ? static::APNS : static::FCM;
                 foreach ($tokens as $token) {
                     $deviceTokens[$token] = $handler;
                 }
@@ -158,7 +196,7 @@ class Push
         //     '<android-device-token1>' => 'fcm',
         //     '<android-device-token2>' => 'fcm',
         // ]
-        return $push->send($message, $deviceTokens);
+        return $this->_resolveResponse($push->send($message, $deviceTokens));
     }
 
     /**
@@ -174,7 +212,7 @@ class Push
     /**
      * Get auth token from APNS
      *
-     * @return \Pushok\AuthProvider\Token
+     * @return string
      */
     private static function apnsAuthToken()
     {
@@ -182,8 +220,63 @@ class Push
             'key_id' => env('APPLE_KEY_ID'), // The Key ID obtained from Apple developer account
             'team_id' => env('APPLE_TEAM_ID'), // The Team ID obtained from Apple developer account
             'app_bundle_id' => env('APPLE_APP_BUNDLE_ID'), // The bundle ID for app obtained from Apple developer account
-            'private_key_path' => env('APPLE_PRIVATE_KEY_PATH'), // Path to private key
+            'private_key_path' => env('APPLE_PRIVATE_KEY_PATH'), // Path to private key (private_key.p8)
             'private_key_secret' => env('APPLE_PRIVATE_KEY_SECRECT') // Private key secret
         ]);
+    }
+
+    /**
+     * Get apns cetificate path
+     *
+     * @return string
+     */
+    private static function apnsCertPath()
+    {
+        return storage_path(env('APPLE_CERT_STORAGE_PATH'));
+    }
+
+    /**
+     * Get apns enviroment
+     *
+     * @return string
+     */
+    private static function apnsEnv()
+    {
+        switch (env('APP_ENV')) {
+            case 'prod':
+            case 'production':
+                return Config::ENV_PRODUCTION;
+            default:
+                return Config::ENV_DEVELOPMENT;
+        }
+    }
+
+    /**
+     * Resolve the response from pushing notification
+     *
+     * @param \ricwein\PushNotification\Result $result
+     * @return null|array
+     */
+    private function _resolveResponse($result)
+    {
+        if (is_object($result)) {
+            $errors = [];
+            // Get device tokens failed
+            $failedDeviceTokens = $result->getInvalidDeviceTokes();
+            foreach ($result->getFailed() as $token => $error) {
+                $errors[$token] = $error;
+                if ($error instanceof ResponseReasonException) {
+                    if ($error->isInvalidDeviceToken()) {
+                        // $token was invalid
+                        $errors[$token] = $error;
+                    } elseif ($error->isRateLimited()) {
+                        // the $token device got too many notifications and is currently rate-limited => better wait some time before sending again.
+                        $errors[$token] = $error;
+                    }
+                }
+            }
+            return $errors;
+        }
+        return null;
     }
 }

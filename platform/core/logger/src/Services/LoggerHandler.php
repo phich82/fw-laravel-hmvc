@@ -63,8 +63,8 @@ class LoggerHandler extends AbstractProcessingHandler
     private function dispatchNotification(array $record)
     {
         // Send log to specified servers based on error levels
-        if ($this->targetChannel && config("logging.channels.{$this->targetChannel}.extra", null)) {
-            $extra = config("logging.channels.{$this->targetChannel}.extra");
+        $extra = config("logging.channels.{$this->targetChannel}.extra");
+        if ($this->targetChannel && $extra) {
             $levelsAllowed = $extra['levels'] ?? [];
             $notifier = $extra['notifier'] ?? null;
             $send = $extra['method'] ?? 'send';
@@ -72,13 +72,13 @@ class LoggerHandler extends AbstractProcessingHandler
             // If error level allowed
             if (
                 in_array($record['level'], $levelsAllowed) &&
-                !empty($extra['data']) &&
+                // !empty($extra['data']) &&
                 is_string($notifier) &&
                 is_callable($extra['callable'])
             ) {
                 $arguments = $extra['callable']($record);
                 // Send message
-                app()->make($notifier)->{$send}(...$arguments);
+                // app()->make($notifier)->{$send}(...$arguments);
             }
         }
     }

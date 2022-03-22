@@ -7,6 +7,11 @@ Route::get('test', function () {
     dd(1);
 });
 
+Route::get('error', function () {
+    throw new Exception('Test Exception');
+});
+
+
 Route::get('demo', [ApiController::class, 'demo']);
 Route::get('json', [ApiController::class, 'json']);
 Route::get('users', [ApiController::class, 'getUsers']);
